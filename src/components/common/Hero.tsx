@@ -9,7 +9,7 @@ export default function HeroSection() {
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center px-4">
-          <div className=' mt-[200px]'>  
+          <div className=' mt-[70px]'>  
               <h4 className="text-white text-lg">
                 Simple and Transparent Real Estate Platform
               </h4>
@@ -21,8 +21,9 @@ export default function HeroSection() {
                 We bring you the perfect way to find residential and commercial properties effortlessly, seamless, reliable, and stress-free.
               </p>
               <Link to="/sign-up" className="w-full">
-                <button className="mt-6 bg-primary hover:bg-hover text-secondary font-semibold py-2 px-6 rounded-full">
-                  Get Started
+                <button className="relative mt-6 bg-gradient-to-b from-[#fbe5f1] to-[#affab0] text-secondary font-semibold py-2 px-6 rounded-full overflow-hidden">
+                  <span className="absolute inset-0 bg-[#fb89e7] opacity-0 hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative z-10">Get Started</span>
                 </button>
               </Link>
             </div>    

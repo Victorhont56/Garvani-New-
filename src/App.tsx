@@ -10,6 +10,7 @@ import { ListingsContainer } from './components/common/ListingsContainer'
 import { SkeltonCard } from './components/common/SkeletonCard'
 import { useState, useEffect } from 'react'
 import AuthProvider from './app/AuthProvider'
+import HeroTwo from './components/common/HeroTwo'
 
 interface AppProps {
   children?: React.ReactNode;  // Add this line
@@ -34,6 +35,7 @@ export default function App({ children }: AppProps) {  // Modify this line
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <HeroSection />
+        <HeroTwo/>
         <ListModal />
         <RegisterModal />
         <LoginModal />

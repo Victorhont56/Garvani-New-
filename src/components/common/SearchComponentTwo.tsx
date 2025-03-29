@@ -32,7 +32,7 @@ export function SearchModalComponentTwo() {
   }
 
   return (
-    <div className="rounded-full py-2 px-5 border-0 sm:border flex items-center cursor-pointer">
+    <div className=" lg:rounded-full md:rounded-full lg:py-2 lg:px-5 md:py-2 md:px-5 border-0 sm:border flex items-center cursor-pointer">
       {/* Menu Links - Hidden on Mobile, Visible on Medium and Large */}
       <div className="hidden sm:flex gap-3 font-medium transition-colors duration-300">
         {["Home", "Discover", "About", "Contact", "Settings"].map((label, idx) => (
@@ -47,7 +47,7 @@ export function SearchModalComponentTwo() {
       </div>
 
       {/* Search Icon - Visible Only on Medium and Larger */}
-      <div className="sm:flex ml-14">
+      <div className="sm:flex md:ml-14 lg:ml-14">
         <Dialog>
           <DialogTrigger asChild>
             <Search
