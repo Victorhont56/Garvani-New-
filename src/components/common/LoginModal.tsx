@@ -1,5 +1,3 @@
-// components/LoginModal.tsx
-
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
@@ -12,8 +10,10 @@ import InputTwo from "./InputTwo";
 import Heading from "./Heading";
 import Button from "./Button";
 import StatusModal from "./StatusModal";
+import { useNavigate } from "react-router-dom";
 
 const LoginModal = () => {
+  const navigate = useNavigate();
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
@@ -47,13 +47,13 @@ const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     }
 
     setIsSuccess(true);
-    setShowStatusModal(true);
     loginModal.onClose();
+    setShowStatusModal(true);
     
     // Delay the reload until after the modal has shown for a bit
     setTimeout(() => {
-      window.location.reload();
-    }, 3000); // Match this with your StatusModal autoCloseDelay
+       navigate("/dashboard");
+     }, 3000); // Match this with your StatusModal autoCloseDelay
 
   } catch (error: any) {
     setIsSuccess(false);

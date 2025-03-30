@@ -10,7 +10,6 @@ import { categoryItems } from "./MapFilterItems";
 import InputTwo from "./InputTwo";
 import Heading from "./Heading";
 import nigerianStatesWithLga from "./NigerianStatesWithLga";
-import axios from "axios";
 import SuccessModal from "./SuccessModal";
 import { X } from "lucide-react";
 import { useAuth } from "@/app/AuthProvider";
@@ -85,15 +84,27 @@ const ListModal = () => {
     });
   };
 
-  const onBack = () => {
-    setStep((value) => value - 1);
-  };
-
   const onNext = () => {
     if (step === STEPS.MODE && type === "Land") {
+      // Skip CATEGORY step for Land
       setStep(STEPS.STATE);
+    } else if (step === STEPS.LGA && type === "Land") {
+      // Skip INFO step for Land, go directly to IMAGES
+      setStep(STEPS.IMAGES);
     } else {
       setStep((value) => value + 1);
+    }
+  };
+  
+  const onBack = () => {
+    if (step === STEPS.IMAGES && type === "Land") {
+      // Go back to LGA from IMAGES for Land
+      setStep(STEPS.LGA);
+    } else if (step === STEPS.STATE && type === "Land") {
+      // Go back to MODE from STATE for Land
+      setStep(STEPS.MODE);
+    } else {
+      setStep((value) => value - 1);
     }
   };
 
@@ -135,56 +146,92 @@ const ListModal = () => {
     setIsLoading(true);
   
     try {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('price', data.price.toString());
-      formData.append('type', data.type);
-      formData.append('mode', data.mode);
-      formData.append('state', data.state);
-      formData.append('lga', data.lga);
-      formData.append('userId', user.id);
-
-      if (data.type === 'Building') {
-        formData.append('category', data.category);
-        formData.append('bedroomCount', data.bedroomCount.toString());
-        formData.append('livingroomCount', data.livingroomCount.toString());
+      // Get fresh session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        throw new Error("Session expired. Please log in again.");
       }
-
-      formData.append('bathroomCount', data.bathroomCount.toString());
-
-      selectedFiles.forEach((file) => {
-        formData.append('images', file);
-      });
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Session expired. Please log in again.");
-        return;
-      }      
-
-    const response = await axios.post('/api/listings', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${session.access_token}`
-      },
-    });
-
-    if (response.status === 201) {
+  
+      // Upload images if any
+      const imageUrls: string[] = [];
+      
+      if (selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `homes/${fileName}`;
+  
+          const { error: uploadError } = await supabase.storage
+          .from('home-images')
+          .upload(filePath, file, {
+            contentType: file.type || 'image/png',
+            upsert: false,
+            cacheControl: '3600',
+            headers: {
+              'X-Client-Info': 'garvani-web/1.0'
+            }
+          });
+  
+          if (uploadError) throw uploadError;
+  
+          const { data: { publicUrl } } = supabase.storage
+            .from('home-images')
+            .getPublicUrl(filePath);
+          
+          imageUrls.push(publicUrl);
+        }
+      }
+  
+      // Prepare home data
+      const homeData = {
+        user_id: user.id,
+        title: data.title,
+        description: data.description || (type === 'Land' ? 'Land property' : ''),
+        price: Number(data.price),
+        type: data.type,
+        mode: data.mode,
+        state: data.state,
+        lga: data.lga,
+        photo: imageUrls[0] || null,
+        images: imageUrls,
+        added_category: data.type === 'Building',
+        added_description: data.type === 'Building',
+        bathrooms: data.bathroomCount.toString(),
+        ...(data.type === 'Building' && {
+          category_name: data.category,
+          bedrooms: data.bedroomCount.toString(),
+          livingrooms: data.livingroomCount.toString(),
+        }),
+      };
+  
+      // Insert with RLS headers
+      const { data: home, error } = await supabase
+        .from('homes')
+        .insert(homeData)
+        .select()
+        .single();
+  
+      if (error) throw error;
+  
+      // Success
       setIsSuccessModalOpen(true);
       reset();
       setSelectedFiles([]);
       setPreviewUrls([]);
       setStep(STEPS.TYPE);
       listModal.onClose();
+  
+    } catch (error) {
+      console.error('Detailed error:', error);
+      toast.error(
+        error instanceof Error ? 
+        error.message : 
+        "Failed to create listing. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    toast.error("Something went wrong. Please try again.");
-    console.error(error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const actionLabel = useMemo(() => {
     if (step === STEPS.PRICE) {
@@ -342,41 +389,43 @@ const ListModal = () => {
     );
   }
 
-  // INFO step
-  if (step === STEPS.INFO) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading
-          title="Share some basics about your place"
-          subtitle="What amenities do you have?"
-        />
-        {type === "Building" && (
-          <>
-            <Counter
-              onChange={(value) => setCustomValue("bedroomCount", value)}
-              value={bedroomCount}
-              title="Bedrooms"
-              subtitle="How many bedrooms do you have?"
-            />
-            <hr />
-            <Counter
-              onChange={(value) => setCustomValue("livingroomCount", value)}
-              value={livingroomCount}
-              title="Livingrooms"
-              subtitle="How many living rooms do you have?"
-            />
-            <hr />
-          </>
-        )}
-        <Counter
-          onChange={(value) => setCustomValue("bathroomCount", value)}
-          value={bathroomCount}
-          title="Bathrooms"
-          subtitle="How many bathrooms do you have?"
-        />
-      </div>
-    );
-  }
+  // INFO step (only shown for Building type)
+if (step === STEPS.INFO && type === "Building") {
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading
+        title="Share some basics about your place"
+        subtitle="What amenities do you have?"
+      />
+      <Counter
+        onChange={(value) => setCustomValue("bedroomCount", value)}
+        value={bedroomCount}
+        title="Bedrooms"
+        subtitle="How many bedrooms do you have?"
+      />
+      <hr />
+      <Counter
+        onChange={(value) => setCustomValue("livingroomCount", value)}
+        value={livingroomCount}
+        title="Livingrooms"
+        subtitle="How many living rooms do you have?"
+      />
+      <hr />
+      <Counter
+        onChange={(value) => setCustomValue("bathroomCount", value)}
+        value={bathroomCount}
+        title="Bathrooms"
+        subtitle="How many bathrooms do you have?"
+      />
+    </div>
+  );
+}
+
+// Skip INFO step for Land - automatically go to IMAGES after LGA
+if (step === STEPS.INFO && type === "Land") {
+  setStep(STEPS.IMAGES);
+  return null;
+}
 
   // IMAGES step
   if (step === STEPS.IMAGES) {
@@ -492,6 +541,8 @@ const ListModal = () => {
       </div>
     );
   }
+
+  if (!listModal.isOpen) return null;
 
   return (
     <>

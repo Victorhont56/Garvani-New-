@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LuMenu } from "react-icons/lu";
 import { useState } from "react";
 import useListModal from "./useListModal";
@@ -22,12 +22,16 @@ export function UserNav() {
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const listModal = useListModal();
-
+  const navigate = useNavigate();
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setShowStatusModal(true);
-      setTimeout(() => setShowStatusModal(false), 3000);
+      // Wait for 3 seconds before navigating
+      setTimeout(() => {
+        setShowStatusModal(false);
+        navigate("/");
+      }, 3000);
     }
   };
 
@@ -63,12 +67,17 @@ export function UserNav() {
                 </button>
               </DropdownMenuItem>
               <DropdownMenuItem className="hover:text-white hover:bg-primary">
-                <Link to="/all-listings" className="w-full">
-                  All Listings
+                <Link to="/dashboard" className="w-full">
+                  My Dashboard
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="hover:text-white hover:bg-primary">
-                <Link to="/my-homes" className="w-full">
+                <Link to="/all-listings" className="w-full">
+                  View all Listings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:text-white hover:bg-primary">
+                <Link to="/my-listings" className="w-full">
                   My Listings
                 </Link>
               </DropdownMenuItem>

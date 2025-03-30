@@ -1,4 +1,3 @@
-'use client';
 import { Link } from "react-router-dom";
 import { UserNav } from "./UserNav";
 import { useEffect, useState } from "react";

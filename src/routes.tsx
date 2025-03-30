@@ -5,26 +5,46 @@ import AllListings from './pages/AllListings';
 import AuthProvider from './app/AuthProvider';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import MyListings from './pages/MyListings';
+import Home from './pages/Home'; 
+import AuthLayout from './layouts/AuthLayout'; 
 
+// src/routes.tsx
 export const routes: RouteObject[] = [
+  {
+    path: '/',
+    element: <App />, // Public layout
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'all-listings', element: <AllListings /> },
+    ],
+  },
   {
     path: '/',
     element: (
       <AuthProvider>
-        <App />
+        <AuthLayout /> {/* Private auth layout */}
       </AuthProvider>
     ),
     children: [
-      { path: 'about', element: <AllListings /> },
-      { 
-        path: 'dashboard', 
+        // Add protected routes here
+      {
+        path: 'dashboard',
         element: (
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        ) 
+        ),
       },
-      // Add other protected routes here
+      {
+        path: 'my-listings',
+        element: (
+          <ProtectedRoute>
+            <MyListings />
+          </ProtectedRoute>
+        ),
+      },
+
     ],
   },
 ];
