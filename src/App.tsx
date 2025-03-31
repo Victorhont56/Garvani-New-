@@ -6,11 +6,15 @@ import Footer from './components/common/Footer'
 import ListModal from './components/common/ListModal'
 import LoginModal from './components/common/LoginModal'
 import RegisterModal from './components/common/RegisterModal'
-
 import { useState, useEffect } from 'react'
 import AuthProvider from './app/AuthProvider'
 import HeroTwo from './components/common/HeroTwo'
 import { Outlet } from 'react-router-dom';
+import StepsComponent from "@/components/common/StepsComponent";
+import WhyChooseUs from './components/common/WhyChooseUs'
+import AllProperty from './components/common/AllProperty'
+
+
 
 interface AppProps {
   children?: React.ReactNode;  // Add this line
@@ -36,6 +40,9 @@ export default function App({ children }: AppProps) {
         <Navbar />
         <HeroSection />
         <HeroTwo/>
+        <WhyChooseUs/>
+        <StepsComponent />
+        <AllProperty/>
         <ListModal />
         <RegisterModal />
         <LoginModal />

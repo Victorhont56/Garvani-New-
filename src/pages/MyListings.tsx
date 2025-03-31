@@ -1,67 +1,61 @@
+// src/app/my-listings/page.tsx
 import { Navbar } from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
 import { ListingCard } from "@/components/common/ListingCard";
 import { NoItems } from "@/components/common/NoItem";
 import { useAuth } from "@/app/AuthProvider";
 import { useEffect, useState } from "react";
-
-interface Listing {
-  id: string;
-  title: string;
-  state: string | null;
-  lga: string | null;
-  mode: string | null;
-  price: number | null;
-  photo: string | null;
-  Favorite: Array<{ id: string }>;
-}
+import { getHome } from "@/lib/action";
+import { ListingCardProps } from "@/types/profile";
 
 const MyListings = () => {
-  const { user, supabase, isLoading: authLoading } = useAuth();
-  const [data, setData] = useState<Listing[]>([]);
+  const { user, isLoading: authLoading } = useAuth();
+  const [data, setData] = useState<ListingCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchListings = async () => {
-      if (!user) return;
+    const fetchHomes = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       
       try {
         setLoading(true);
-        const { data: listings, error } = await supabase
-          .from('listings')
-          .select(`
-            id,
-            title,
-            state,
-            lga,
-            mode,
-            price,
-            photo,
-            Favorite (id)
-          `)
-          .eq('userId', user.id);
-
-        if (error) throw error;
-        setData(listings || []);
+        setError(null);
+        const homes = await getHome(user.id);
+        setData(homes);
       } catch (err) {
-        console.error('Error fetching listings:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error('Error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load homes');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListings();
-  }, [user, supabase]);
+    fetchHomes();
+  }, [user]);
 
-  if (authLoading || loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (authLoading) return <div className="p-4 text-center">Checking authentication...</div>;
+  if (loading) return <div className="p-4 text-center">Loading your homes...</div>;
+  if (error) return (
+    <div className="p-4 text-center text-red-500">
+      <p>Error loading homes:</p>
+      <p className="font-medium">{error}</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="mt-2 px-4 py-2 bg-secondary text-white rounded"
+      >
+        Try Again
+      </button>
+    </div>
+  );
 
   return (
     <div>
       <Navbar />
-      <section className="container mx-auto px-5 lg:px-10 my-10">
+      <section className="container mx-auto px-5 lg:px-10 mb-10 mt-[150px]">
         <h2 className="text-3xl font-semibold tracking-tight">Your Homes</h2>
 
         {data.length === 0 ? (
@@ -74,17 +68,9 @@ const MyListings = () => {
             {data.map((item) => (
               <ListingCard
                 key={item.id}
-                imagePath={item.photo ?? ""}
-                title={item.title ?? ""}
-                state={item.state ?? ""}
-                lga={item.lga ?? ""}
-                mode={item.mode ?? ""}
-                price={item.price ?? 0}
+                item={item}
                 userId={user?.id ?? ""}
-                pathName="/my-homes"
-                favoriteId={item.Favorite[0]?.id}
-                homeId={item.id}
-                isInFavoriteList={item.Favorite.length > 0}
+                pathName="/my-listings"
               />
             ))}
           </div>

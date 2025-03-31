@@ -26,6 +26,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.5.2",
     "form": "^0.2.5",
+    "framer-motion": "^12.6.2",
     "lucide-react": "^0.484.0",
     "postcss": "^8.5.3",
     "query-string": "^9.1.1",

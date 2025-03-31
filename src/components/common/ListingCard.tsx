@@ -1,35 +1,23 @@
+// src/components/common/ListingCard.tsx
 import { Link } from "react-router-dom";
 import { AddToFavoriteButton, DeleteFromFavoriteButton } from "./SubmitButtons";
-
-interface ListingCardProps {
-  imagePath: string;
-  title: string;
-  state: string;
-  lga: string;
-  mode: string;
-  price: number;
-  userId: string | null | undefined;
-  isInFavoriteList: boolean;
-  favoriteId: string;
-  homeId: string;
-  pathName: string;
-}
+import { ListingCardProps } from "@/types/profile";
 
 export function ListingCard({
-  imagePath,
-  state,
-  lga,
-  mode,
-  title,
-  price,
+  item,
   userId,
-  favoriteId,
-  homeId,
-  isInFavoriteList,
-  pathName,
-}: ListingCardProps) {
+  pathName
+}: {
+  item: ListingCardProps;
+  userId: string;
+  pathName: string;
+}) {
+  const { id, state, lga, mode, title, price, favorites, photo } = item;
+  const favorite = favorites.find(fav => fav.user_id === userId);
+  const isInFavoriteList = !!favorite;
+
   return (
-    <Link to={`/home/${homeId}`} className="mt-2">
+    <Link to={`/my-listings/${id}`} className="mt-2">
       <div className="items-center justify-center w-[270px] flex flex-col bg-[#e7e7d0] rounded-2xl hover:border-[3px] hover:border-gray-300 hover:shadow-2xl shadow:xl md:shadow-none lg:shadow:none transition duration-300 ease-in-out">
         <div className="flex flex-col items-center justify-center">
           <div className="my-[10px]">
@@ -48,25 +36,24 @@ export function ListingCard({
 
           <div className="relative h-[200px] w-[250px]">
             <div>
-              {/* Using regular img tag or Vite's import.meta.url for images */}
               <img
-                src={imagePath}
+                src={photo || ''}
                 alt="Image of House"
-                className="rounded-lg h-full w-full object-cover"
+                className="rounded-lg  h-[200px] w-[300px] object-cover"
               />
 
               {userId && (
                 <div className="z-10 absolute top-2 right-2">
                   {isInFavoriteList ? (
                     <form>
-                      <input type="hidden" name="favoriteId" value={favoriteId} />
+                      <input type="hidden" name="favoriteId" value={favorite.id} />
                       <input type="hidden" name="userId" value={userId} />
                       <input type="hidden" name="pathName" value={pathName} />
                       <DeleteFromFavoriteButton />
                     </form>
                   ) : (
                     <form>
-                      <input type="hidden" name="homeId" value={homeId} />
+                      <input type="hidden" name="homeId" value={id} />
                       <input type="hidden" name="userId" value={userId} />
                       <input type="hidden" name="pathName" value={pathName} />
                       <AddToFavoriteButton />
@@ -79,8 +66,14 @@ export function ListingCard({
 
           <div className="my-[10px]">
             <div className="flex justify-between w-[250px]">
-              <h3 className="font-medium text-base">{state}</h3>
-              <h3 className="font-medium text-base">{lga}</h3>
+                <div className="flex flex-col items-center justify-center"> 
+                  <h3 className="font-medium text-[#6D7280]">State</h3>
+                   <h3 className="font-medium text-base">{state}</h3>
+                </div>  
+                <div className="flex flex-col items-center justify-center">  
+                  <h3 className="font-medium text-[#6D7280]">LGA</h3>
+                  <h3 className="font-medium text-base">{lga}</h3>
+                </div>  
             </div>
           </div>
         </div>

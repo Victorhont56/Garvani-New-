@@ -1,27 +1,37 @@
 // src/types/profile.ts
 export type Profile = {
-    id: string;
-    email: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+};
 
-  export interface HomeData {
-    user_id: string;
-    title: string;
-    description: string;
-    price: number;
-    type: string;
-    mode: string;
-    state: string;
-    lga: string;
-    photo: string | null;
-    images: string[];
-    bathrooms: string;
-    added_category: boolean;
-    added_description: boolean;
-    category_name?: string;
-    bedrooms?: string;
-    livingrooms?: string;
-  }
+export interface Favorite {
+  id: string;
+  user_id: string;
+  home_id: string;
+}
+
+export interface ListingCardProps {
+  id: string;
+  title: string;
+  price: number;
+  mode: string;
+  state: string;
+  lga: string;
+  photo: string | null;
+  category_name?: string;
+  favorites: Favorite[];
+}
+
+export interface HomeData extends ListingCardProps {
+  user_id: string;
+  description: string;
+  type: string;
+  images: string[];
+  bathrooms: string;
+  added_category: boolean;
+  added_description: boolean;
+  bedrooms?: string;
+  livingrooms?: string;
+}

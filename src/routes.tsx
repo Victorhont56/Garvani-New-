@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import MyListings from './pages/MyListings';
 import Home from './pages/Home'; 
 import AuthLayout from './layouts/AuthLayout'; 
+import ListingDetails from "./pages/ListingsDetails";
+
 
 // src/routes.tsx
 export const routes: RouteObject[] = [
@@ -44,6 +46,14 @@ export const routes: RouteObject[] = [
           </ProtectedRoute>
         ),
       },
+      {
+        path: "my-listings/:id",
+        element:  (
+          <ProtectedRoute>
+            <ListingDetails />
+          </ProtectedRoute>
+        )
+      }, 
 
     ],
   },

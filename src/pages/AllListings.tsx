@@ -4,6 +4,7 @@ import CategoryCarousal from "../components/common/CategoryCarousal";
 import { SearchModalComponentThree } from "../components/common/SearchComponentThree";
 import { FaPlus } from "react-icons/fa6";
 import { supabase } from "@/lib/supabase/client";
+import { Favorite } from "@/types/profile";
 
 interface Listing {
   id: string;
@@ -14,7 +15,7 @@ interface Listing {
   mode: string;
   type: string;
   price: number;
-  Favorite: { id: string; userId: string }[];
+  favorites: Favorite[];
 }
 
 export default function AllListings() {
@@ -44,12 +45,23 @@ export default function AllListings() {
       try {
         const response = await fetch(`/api/listings?mode=${mode}`);
         const data = await response.json();
-        setListings(data);
+        
+        // Transform the data to match our types
+        const transformedData = data.map((listing: any) => ({
+          ...listing,
+          favorites: listing.Favorite ? listing.Favorite.map((fav: any) => ({
+            id: fav.id,
+            user_id: fav.userId, // Map userId to user_id
+            home_id: listing.id  // Set home_id from listing.id
+          })) : []
+        }));
+        
+        setListings(transformedData);
       } catch (error) {
         console.error("Failed to fetch listings:", error);
       }
     };
-
+  
     fetchListings();
   }, [mode, selectedCategory]);
 
@@ -113,24 +125,23 @@ export default function AllListings() {
       {/* Listings Grid */}
       <div className="flex justify-center px-4 mt-[250px]">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              imagePath={listing.photo}
-              title={listing.title}
-              state={listing.state}
-              lga={listing.lga}
-              mode={listing.mode}
-              price={listing.price}
-              userId={userId}
-              isInFavoriteList={listing.Favorite.some(
-                (fav) => fav.userId === userId
-              )}
-              favoriteId={listing.Favorite.find((fav) => fav.userId === userId)?.id || ""}
-              homeId={listing.id}
-              pathName="/all-listings"
-            />
-          ))}
+        {filteredListings.map((listing) => (
+          <ListingCard
+            key={listing.id}
+            item={{
+              id: listing.id,
+              title: listing.title,
+              price: listing.price,
+              mode: listing.mode,
+              state: listing.state,
+              lga: listing.lga,
+              photo: listing.photo,
+              favorites: listing.favorites
+            }}
+            userId={userId || ''}
+            pathName="/all-listings"
+          />
+        ))}
         </div>
       </div>
     </div>
