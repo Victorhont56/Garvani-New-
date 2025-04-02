@@ -41,9 +41,7 @@ export default function App({ children }: AppProps) {
         <WhyChooseUs/>
         <StepsComponent />
         <AllProperty/>
-        <ListModal />
-        <RegisterModal />
-        <LoginModal />
+        
         
         <main className="flex-grow">
           <Outlet /> {/* This renders the matched child route */}
@@ -54,18 +52,21 @@ export default function App({ children }: AppProps) {
       {children}
       
       {/* Add the Toaster component here */}
+      <ListModal />
+      <RegisterModal />
+      <LoginModal />
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#363636',
+            background: '#18D619',
             color: '#fff',
           },
           success: {
             duration: 3000,
             iconTheme: {
-              primary: 'green',
+              primary: '#4e82e3',
               secondary: 'white',
             },
           },
@@ -76,8 +77,7 @@ export default function App({ children }: AppProps) {
               secondary: 'white',
             },
           },
-        }}
-      />
+      }} />
     </AuthProvider>
   );
 }

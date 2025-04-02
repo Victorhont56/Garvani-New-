@@ -10,10 +10,12 @@ import { categoryItems } from "./MapFilterItems";
 import InputTwo from "./InputTwo";
 import Heading from "./Heading";
 import nigerianStatesWithLga from "./NigerianStatesWithLga";
-import SuccessModal from "./SuccessModal";
 import { X } from "lucide-react";
 import { useAuth } from "@/app/AuthProvider";
 import { supabase } from "@/lib/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { showSuccessToast } from "@/utils/toast";
+
 
 enum STEPS {
   TYPE = 0,
@@ -28,12 +30,12 @@ enum STEPS {
 }
 
 const ListModal = () => {
+  const navigate = useNavigate();
   const listModal = useListModal();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(STEPS.TYPE);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const { user, isLoading: isAuthLoading } = useAuth(); // Get user from AuthProvider
 
   const {
@@ -214,12 +216,14 @@ const ListModal = () => {
       if (error) throw error;
   
       // Success
-      setIsSuccessModalOpen(true);
+      showSuccessToast('Listing Created Successfully!');
       reset();
       setSelectedFiles([]);
       setPreviewUrls([]);
       setStep(STEPS.TYPE);
       listModal.onClose();
+      navigate('/my-listings')
+
   
     } catch (error) {
       console.error('Detailed error:', error);
@@ -556,11 +560,6 @@ if (step === STEPS.INFO && type === "Land") {
         secondaryAction={step === STEPS.TYPE ? undefined : onBack}
         onClose={listModal.onClose}
         body={bodyContent}
-      />
-
-      <SuccessModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
       />
     </>
   );

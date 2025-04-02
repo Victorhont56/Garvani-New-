@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 
 export default function AuthConfirm() {
   const [searchParams] = useSearchParams();
@@ -51,6 +51,29 @@ export default function AuthConfirm() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
         <p>Confirming your email...</p>
       </div>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#18D619',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4e82e3',
+              secondary: 'white',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: 'red',
+              secondary: 'white',
+            },
+          },
+        }} />
     </div>
   );
 }

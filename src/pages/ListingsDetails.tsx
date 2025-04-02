@@ -14,6 +14,8 @@ import { MdApartment, MdHouse, MdVilla } from 'react-icons/md';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ListModal from '@/components/common/ListModal';
+import { Toaster } from 'react-hot-toast';
 
 interface ProfileData {
   id: string;
@@ -355,7 +357,30 @@ export default function ListingDetails() {
           <RatingsAndReviews homeId={id} />
         </div>
       </div>
-
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#18D619',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4e82e3',
+              secondary: 'white',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: 'red',
+              secondary: 'white',
+            },
+          },
+        }} />
+      <ListModal/>
       <Footer />
     </div>
   );

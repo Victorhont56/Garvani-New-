@@ -83,7 +83,7 @@ const Modal: React.FC<ModalProps> = ({
               flex 
               flex-col 
               w-full 
-              bg-gradient-to-b from-[#fbd5ea] to-[#affab0]
+              bg-gradient-to-b from-[#fbe5f1] to-[#c095fb]
               outline-none 
               focus:outline-none
               max-h-[90vh]
@@ -101,7 +101,7 @@ const Modal: React.FC<ModalProps> = ({
                 border-neutral-200
                 sticky
                 top-0
-                bg-[#fbd5ea] 
+                bg-[#fbe5f1]
                 z-10
               ">
                 <button
@@ -128,7 +128,7 @@ const Modal: React.FC<ModalProps> = ({
               </div>
               
               {/*footer*/}
-              <div className="flex flex-col gap-4 px-6 py-2 sticky bottom-0 bg-[#affab0] border-t-[1px] border-neutral-200">
+              <div className="flex flex-col gap-4 px-6 py-2 sticky bottom-0 bg-[#c095fb] border-t-[1px] border-neutral-200">
                 <div className="flex flex-row items-center gap-4 w-full">
                   {secondaryAction && secondaryActionLabel && (
                     <div className="w-full md:w-1/2">

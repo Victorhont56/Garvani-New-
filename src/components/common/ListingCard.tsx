@@ -18,7 +18,7 @@ export function ListingCard({
 
   return (
     <Link to={`/listing/${id}`} className="mt-2">
-      <div className="items-center justify-center w-[270px] flex flex-col bg-[#e7e7d0] rounded-2xl hover:border-[3px] hover:border-gray-300 hover:shadow-2xl shadow:xl md:shadow-none lg:shadow:none transition duration-300 ease-in-out">
+      <div className="items-center justify-center w-[270px] flex flex-col bg-[#efe7f6] rounded-2xl hover:border-[3px] hover:border-gray-300 hover:shadow-2xl shadow:xl md:shadow-none lg:shadow:none transition duration-300 ease-in-out">
         <div className="flex flex-col items-center justify-center">
           <div className="my-[10px]">
             <div className="w-[250px] flex flex-row items-center justify-between">

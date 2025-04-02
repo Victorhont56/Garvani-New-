@@ -14,6 +14,7 @@ import useListModal from '@/components/common/useListModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 
 
@@ -288,6 +289,29 @@ const Dashboard = () => {
           ))}
         </div>
       </main>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#18D619',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#4e82e3',
+              secondary: 'white',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: 'red',
+              secondary: 'white',
+            },
+          },
+        }} />
       <Footer />
       <ListModal />
     </div>
