@@ -47,7 +47,7 @@ export const routes: RouteObject[] = [
         ),
       },
       {
-        path: "my-listings/:id",
+        path: "listing/:id",
         element:  (
           <ProtectedRoute>
             <ListingDetails />

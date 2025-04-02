@@ -34,4 +34,12 @@ export interface HomeData extends ListingCardProps {
   added_description: boolean;
   bedrooms?: string;
   livingrooms?: string;
+  created_at: Date | string;
+  
+  address?: string;
+  size?: number; // in sqft
+  features?: string[];
+  year_built?: number;
+  updated_at?: Date | string;
+
 }
