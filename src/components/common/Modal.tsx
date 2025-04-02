@@ -83,7 +83,7 @@ const Modal: React.FC<ModalProps> = ({
               flex 
               flex-col 
               w-full 
-              bg-gradient-to-b from-[#fbe5f1] to-[#c095fb]
+              bg-gradient-to-b from-[#fbe5f1] to-[#e7e0ff]
               outline-none 
               focus:outline-none
               max-h-[90vh]
@@ -128,7 +128,7 @@ const Modal: React.FC<ModalProps> = ({
               </div>
               
               {/*footer*/}
-              <div className="flex flex-col gap-4 px-6 py-2 sticky bottom-0 bg-[#c095fb] border-t-[1px] border-neutral-200">
+              <div className="flex flex-col gap-4 px-6 py-2 sticky bottom-0 bg-[#e7e0ff] border-t-[1px] border-neutral-200">
                 <div className="flex flex-row items-center gap-4 w-full">
                   {secondaryAction && secondaryActionLabel && (
                     <div className="w-full md:w-1/2">

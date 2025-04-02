@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { UserNav } from "./UserNav";
 import { useEffect, useState } from "react";
-import { SearchModalComponentTwo } from "./SearchComponentTwo";
+import { SearchModalComponentTwo } from "./SearchModalComponentTwo";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);

@@ -139,7 +139,7 @@ const handleGoogleSignIn = async () => {
         onClick={handleGoogleSignIn}
         disabled={isLoading}
       />
-      <div className="text-neutral-500 text-center mt-[5px] font-light">
+      <div className="text-neutral-500 text-center mb-[5px] font-medium">
         <p>
           First time using Garvani?
           <span

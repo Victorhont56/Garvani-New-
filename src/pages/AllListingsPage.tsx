@@ -1,11 +1,14 @@
+// src/app/all-listings/page.tsx
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/app/AuthProvider';
 import { ListingCard } from '@/components/common/ListingCard';
+import { SearchModal } from '@/components/common/SearchModal';
 import { FiSearch } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
+import { Navbar } from '@/components/common/Navbar';
+import Footer from '@/components/common/Footer';
 import useSearchModal from '@/components/common/useSearchModal';
-import { SearchModal } from '@/components/common/SearchModal';
 
 interface Listing {
   id: string;
@@ -20,7 +23,7 @@ interface Listing {
   favorites: any[];
 }
 
-const AllPropertySection = () => {
+const AllProperty = () => {
   const { user } = useAuth();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,8 +91,10 @@ const AllPropertySection = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <Navbar/>
+      <div className='mt-[100px]'>
       {/* Sticky Header Container */}
-      <div className="sticky top-[60px] z-40 bg-white shadow-sm">
+      <div className="sticky top-[60px] z-40 bg-white shadow-sm ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Content */}
           <div className="flex flex-row justify-between items-center py-4">
@@ -106,9 +111,9 @@ const AllPropertySection = () => {
           </div>
         </div>
       </div>
-      
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+
+      {/* Listings grid */}
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -158,11 +163,15 @@ const AllPropertySection = () => {
           </div>
         )}
       </div>
+
+      {/* Search Modal */}
       <SearchModal 
         onApplyFilters={handleApplyFilters}
       />
+      <Footer/>
+     </div>
     </div>
   );
 };
 
-export default AllPropertySection;
+export default AllProperty;

@@ -13,7 +13,7 @@ import { Outlet } from 'react-router-dom'
 import StepsComponent from "@/components/common/StepsComponent"
 import WhyChooseUs from './components/common/WhyChooseUs'
 import AllProperty from './components/common/AllProperty'
-import { Toaster } from 'react-hot-toast' // Add this import
+import { Toaster } from 'react-hot-toast' 
 
 interface AppProps {
   children?: React.ReactNode;
@@ -22,6 +22,7 @@ interface AppProps {
 export default function App({ children }: AppProps) {
   const [searchParams, setSearchParams] = useState<Record<string, string | undefined>>({});
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { AddToFavoriteButton, DeleteFromFavoriteButton } from "./SubmitButtons";
 import { ListingCardProps } from "@/types/profile";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 export function ListingCard({
   item,
@@ -22,14 +23,17 @@ export function ListingCard({
         <div className="flex flex-col items-center justify-center">
           <div className="my-[10px]">
             <div className="w-[250px] flex flex-row items-center justify-between">
-              <h3 className="font-medium text-[#6D7280]">
+              <h3 className="font-medium text-gray-700">
                 For {mode}
               </h3>
-              <p className="text-muted-foreground">
-                <span className="font-medium text-black">${price}</span> /Month
-              </p>
+              <div >
+                <p className="flex flex-row text-muted-foreground">
+                  <span className="font-medium text-black flex flex-row items-center"><TbCurrencyNaira size={20}/> {price}</span>
+                  <span className="text-gray-700">/Month</span>
+                </p>
+              </div>
             </div>
-            <p className="text-muted-foreground text-sm line-clamp-2">
+            <p className="text-muted-foreground text-sm line-clamp-2 text-gray-700">
               {title}
             </p>
           </div>
@@ -39,7 +43,7 @@ export function ListingCard({
               <img
                 src={photo || ''}
                 alt="Image of House"
-                className="rounded-lg  h-[200px] w-[300px] object-cover"
+                className="rounded-lg h-[200px] w-[300px] object-cover"
               />
 
               {userId && (
@@ -67,11 +71,11 @@ export function ListingCard({
           <div className="my-[10px]">
             <div className="flex justify-between w-[250px]">
                 <div className="flex flex-col items-center justify-center"> 
-                  <h3 className="font-medium text-[#6D7280]">State</h3>
+                  <h3 className="font-medium text-gray-700">State</h3>
                    <h3 className="font-medium text-base">{state}</h3>
                 </div>  
                 <div className="flex flex-col items-center justify-center">  
-                  <h3 className="font-medium text-[#6D7280]">LGA</h3>
+                  <h3 className="font-medium text-gray-700">LGA</h3>
                   <h3 className="font-medium text-base">{lga}</h3>
                 </div>  
             </div>

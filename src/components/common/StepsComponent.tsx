@@ -55,7 +55,7 @@ const StepsComponent = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -130,19 +130,21 @@ const StepsComponent = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         viewport={{ once: true }}
-        className="text-center"
+        className="text-center my-[100px] "
       >
-        <h3 className="text-2xl sm:text-3xl font-medium text-gray-800 mb-6">
-          Ready to begin your real estate journey?
-        </h3>
-        <motion.button
-          onClick={registerModal.onOpen} // Open register modal on click
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all"
-        >
-          Get Started Now
-        </motion.button>
+        <div className="h-[400px] bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl flex flex-col items-center justify-center">
+          <h3 className="text-2xl sm:text-3xl font-medium text-gray-800 px-6">
+            Ready to begin your real estate journey?
+          </h3>
+          <motion.button
+            onClick={registerModal.onOpen} // Open register modal on click
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 mt-[30px] bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all"
+          >
+            Get Started Now
+          </motion.button>
+        </div>
       </motion.div>
     </div>
   );
