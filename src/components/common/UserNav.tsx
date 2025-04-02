@@ -12,15 +12,15 @@ import { useState, useRef, useEffect } from "react";
 import useListModal from "./useListModal";
 import useLoginModal from "./useLoginModal";
 import useRegisterModal from "./useRegisterModal";
-import StatusModal from "./StatusModal";
 import { useAuth } from "@/app/AuthProvider";
 import { supabase } from "@/lib/supabase/client";
 import { Tooltip } from "@/components/ui/tooltip";
 import { FiUpload } from "react-icons/fi";
+import { showSuccessToast, showErrorToast } from '@/utils/toast';
+
 
 export function UserNav() {
   const { user, isLoading } = useAuth();
-  const [showStatusModal, setShowStatusModal] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +70,7 @@ export function UserNav() {
   // Handle profile image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0] || !user) {
-      alert('No file selected or user not logged in');
+      showErrorToast('No file selected or user not logged in');
       return;
     }
   
@@ -79,12 +79,12 @@ export function UserNav() {
     
     // Validate file
     if (!validTypes.includes(file.type)) {
-      alert('Please upload a JPEG, PNG, or WEBP image');
+      showErrorToast('Please upload a JPEG, PNG, or WEBP image');
       return;
     }
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      showErrorToast('File size must be less than 5MB');
       return;
     }
   
@@ -123,10 +123,10 @@ export function UserNav() {
       if (updateError) throw updateError;
   
       setProfileImage(publicUrl);
-      alert('Profile image updated successfully!');
+      showSuccessToast('Profile image updated successfully!');
     } catch (error) {
       console.error('Error:', error);
-      alert(`Operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showErrorToast(`Operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -136,11 +136,10 @@ export function UserNav() {
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
-      setShowStatusModal(true);
-      setTimeout(() => {
-        setShowStatusModal(false);
-        navigate("/");
-      }, 3000);
+      showSuccessToast('Logged out successfully');
+      navigate("/");
+    } else {
+      showErrorToast('Failed to log out');
     }
   };
 
@@ -281,14 +280,6 @@ export function UserNav() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <StatusModal
-        isOpen={showStatusModal}
-        onClose={() => setShowStatusModal(false)}
-        isSuccess={true}
-        title="Logged out successfully"
-        body={<p className="text-black">You have been logged out</p>}
-      />
     </>
   );
 }
