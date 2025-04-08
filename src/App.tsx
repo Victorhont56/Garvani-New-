@@ -54,15 +54,16 @@ export default function App({ children }: AppProps) {
       
       {/* Add the Toaster component here */}
       <ListModal />
-      <RegisterModal />
       <LoginModal />
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 4000,
           style: {
+            zIndex: 9999,
             background: '#18D619',
             color: '#fff',
+            fontWeight: 'bold',
           },
           success: {
             duration: 3000,
@@ -78,7 +79,9 @@ export default function App({ children }: AppProps) {
               secondary: 'white',
             },
           },
-      }} />
+        }}
+      />
+      <RegisterModal />
     </AuthProvider>
   );
 }
