@@ -9,9 +9,7 @@ import Input from "./InputTwo";
 import Heading from "./Heading";
 import Button from "./Button";
 import StatusModal from "./StatusModal";
-import { Profile } from "@/types/profile";
 import { useAuth } from "@/app/AuthProvider";
-
 
 const RegisterModal = () => {
   const registerModal = useRegisterModal();
@@ -19,13 +17,13 @@ const RegisterModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
-  const { supabase } = useAuth(); // Get supabase client from AuthProvider
+  const { supabase } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<FieldValues>({
     defaultValues: {
       firstname: "",
@@ -35,6 +33,9 @@ const RegisterModal = () => {
     },
     mode: "onChange",
   });
+
+  // Check if email confirmation is required from environment
+  const requiresEmailConfirmation = import.meta.env.VITE_REQUIRE_EMAIL_CONFIRMATION === "true";
 
   useEffect(() => {
     if (isSuccess && showStatusModal) {
@@ -51,77 +52,94 @@ const RegisterModal = () => {
     email: string,
     firstName: string,
     lastName: string
-  ): Promise<Profile> => {
+  ) => {
     const { data, error } = await supabase
       .from('profiles')
       .upsert({
         id: userId,
         email,
         first_name: firstName,
-        last_name: lastName
+        last_name: lastName,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
-  
+
     if (error) {
       console.error('Profile creation error:', error);
       throw new Error('Failed to create user profile');
     }
-  
+
     return data;
   };
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
-    setPasswordError("");
-  
+    
     try {
-      // 1. Validate password
-      if (data.password.length < 6) {
-        throw new Error("Password must be at least 6 characters");
-      }
-  
-      // 2. Create auth user
+      // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          data: {
-            first_name: data.firstname,
-            last_name: data.lastname,
-          },
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        }
+          data: {
+            first_name: data.firstname || '',
+            last_name: data.lastname || '',
+          }
+        },
       });
-  
+      
+
       if (authError) {
-        console.error('SignUp Error Details:', {
+        console.error('Auth Error:', {
           code: authError.code,
-          status: authError.status,
-          message: authError.message
+          message: authError.message,
+          status: authError.status
         });
         throw authError;
       }
-  
-      // 3. Check if email confirmation is required
-      if (authData.user && authData.user.identities?.length === 0) {
-        toast.success('Please check your email for confirmation');
+
+      // 2. Create public profile if user was created
+      if (authData.user) {
+        await createPublicUserProfile(
+          authData.user.id,
+          data.email,
+          data.firstname,
+          data.lastname
+        );
       }
-  
+
+      // 3. Handle success
       setIsSuccess(true);
       setShowStatusModal(true);
-  
+
+      // Show appropriate message based on email confirmation requirement
+      if (requiresEmailConfirmation) {
+        toast.success('Please check your email for confirmation');
+      } else {
+        toast.success('Registration successful! You can now login.');
+      }
+
     } catch (error: any) {
-      console.error('Registration Error:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-      toast.error(error.message || "Registration failed. Please try again.");
+      console.error('Registration Failed:', error);
+      setIsSuccess(false);
+      setShowStatusModal(true);
+
+      // Handle specific error cases
+      if (error.message.includes('User already registered')) {
+        toast.error('This email is already registered');
+      } else if (error.message.includes('Database error')) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error(error.message || 'Registration failed');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ... rest of your component remains the same ...
   
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -196,9 +214,6 @@ const RegisterModal = () => {
           value.length >= 6 || "Password must be at least 6 characters"
         }
       />
-      {passwordError && (
-        <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-      )}
     </div>
   );
 

@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { toast } from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import useRegisterModal from "./useRegisterModal";
@@ -9,16 +8,14 @@ import Modal from "./Modal";
 import InputTwo from "./InputTwo";
 import Heading from "./Heading";
 import Button from "./Button";
-import StatusModal from "./StatusModal";
 import { useNavigate } from "react-router-dom";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
 
 const LoginModal = () => {
   const navigate = useNavigate();
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register,
@@ -46,19 +43,16 @@ const onSubmit: SubmitHandler<FieldValues> = async (data) => {
       throw error;
     }
 
-    setIsSuccess(true);
-    loginModal.onClose();
-    setShowStatusModal(true);
+    showSuccessToast("Login successful! Redirecting...");
     
-    // Delay the reload until after the modal has shown for a bit
+    // Wait a bit before closing the modal to show the toast
     setTimeout(() => {
-       navigate("/dashboard");
-     }, 3000); // Match this with your StatusModal autoCloseDelay
+      loginModal.onClose();
+      navigate("/dashboard");
+    }, 2000);
 
   } catch (error: any) {
-    setIsSuccess(false);
-    setShowStatusModal(true);
-    toast.error(error.message || "An error occurred during login");
+    showErrorToast(error.message || "An error occurred during login");
   } finally {
     setIsLoading(false);
   }
@@ -83,19 +77,16 @@ const handleGoogleSignIn = async () => {
       throw error;
     }
 
-    setIsSuccess(true);
-    setShowStatusModal(true);
-    loginModal.onClose();
+   showSuccessToast("Google login successful! Redirecting...");
     
-    // Delay the reload until after the modal has shown for a bit
+    // Wait a bit before closing the modal to show the toast
     setTimeout(() => {
+      loginModal.onClose();
       window.location.reload();
-    }, 3000); // Match this with your StatusModal autoCloseDelay
+    }, 2000);
 
   } catch (error: any) {
-    setIsSuccess(false);
-    setShowStatusModal(true);
-    toast.error(error.message || "Google login failed");
+    showErrorToast(error.message || "Google login failed");
   } finally {
     setIsLoading(false);
   }
@@ -169,13 +160,6 @@ const handleGoogleSignIn = async () => {
         onSubmit={handleSubmit(onSubmit)}
         body={bodyContent}
         footer={footerContent}
-      />
-      <StatusModal
-        isOpen={showStatusModal}
-        onClose={() => setShowStatusModal(false)}
-        isSuccess={isSuccess}
-        title="Logged in successfully"
-        body={<p className="text-black">Login was successful!</p>}
       />
     </>
   );
