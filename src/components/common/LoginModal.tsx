@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+// LoginModal.tsx
+import { useCallback, useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import useRegisterModal from "./useRegisterModal";
@@ -8,11 +9,12 @@ import Modal from "./Modal";
 import InputTwo from "./InputTwo";
 import Heading from "./Heading";
 import Button from "./Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
 
 const LoginModal = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,69 +30,65 @@ const LoginModal = () => {
     },
   });
 
-// In your LoginModal.tsx, update the relevant parts:
-
-const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-  setIsLoading(true);
-
-  try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      throw error;
+  // Show success message if redirected from email confirmation
+  useEffect(() => {
+    if (location.search.includes('confirmed=true')) {
+      showSuccessToast('Email confirmed successfully! Please login.');
+      // Clear the query param
+      navigate(location.pathname, { replace: true });
     }
+  }, [location, navigate]);
 
-    showSuccessToast("Login successful! Redirecting...");
-    
-    // Wait a bit before closing the modal to show the toast
-    setTimeout(() => {
-      loginModal.onClose();
-      navigate("/dashboard");
-    }, 2000);
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    setIsLoading(true);
 
-  } catch (error: any) {
-    showErrorToast(error.message || "An error occurred during login");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
 
-const handleGoogleSignIn = async () => {
-  setIsLoading(true);
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+      if (error) throw error;
+
+      showSuccessToast("Login successful! Redirecting...");
+      setTimeout(() => {
+        loginModal.onClose();
+        navigate("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      showErrorToast(error.message || "An error occurred during login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      console.error('Google OAuth error:', error);
-      throw error;
+      if (error) throw error;
+
+      showSuccessToast("Google login successful! Redirecting...");
+      setTimeout(() => {
+        loginModal.onClose();
+        navigate("/dashboard");
+      }, 2000);
+    } catch (error: any) {
+      showErrorToast(error.message || "Google login failed");
+    } finally {
+      setIsLoading(false);
     }
-
-   showSuccessToast("Google login successful! Redirecting...");
-    
-    // Wait a bit before closing the modal to show the toast
-    setTimeout(() => {
-      loginModal.onClose();
-      window.location.reload();
-    }, 2000);
-
-  } catch (error: any) {
-    showErrorToast(error.message || "Google login failed");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const onToggle = useCallback(() => {
     loginModal.onClose();
@@ -135,11 +133,7 @@ const handleGoogleSignIn = async () => {
           First time using Garvani?
           <span
             onClick={onToggle}
-            className="
-              text-neutral-800
-              cursor-pointer 
-              hover:underline
-            "
+            className="text-neutral-800 cursor-pointer hover:underline"
           >
             {" "}
             Create an account
@@ -150,18 +144,16 @@ const handleGoogleSignIn = async () => {
   );
 
   return (
-    <>
-      <Modal
-        disabled={isLoading}
-        isOpen={loginModal.isOpen}
-        title="Login"
-        actionLabel="Continue"
-        onClose={loginModal.onClose}
-        onSubmit={handleSubmit(onSubmit)}
-        body={bodyContent}
-        footer={footerContent}
-      />
-    </>
+    <Modal
+      disabled={isLoading}
+      isOpen={loginModal.isOpen}
+      title="Login"
+      actionLabel="Continue"
+      onClose={loginModal.onClose}
+      onSubmit={handleSubmit(onSubmit)}
+      body={bodyContent}
+      footer={footerContent}
+    />
   );
 };
 

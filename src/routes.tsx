@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import MyListings from './pages/MyListings';
 import AuthLayout from './layouts/AuthLayout'; 
 import ListingDetails from "./pages/ListingsDetails";
+import LoginPage from './pages/LoginPage';
 
 
 // src/routes.tsx
@@ -53,6 +54,7 @@ export const routes: RouteObject[] = [
         )
       }, 
       { path: 'all-listings', element: <AllListings /> },
+      { path: 'login-page', element: <LoginPage /> },
     ],
   },
 ];

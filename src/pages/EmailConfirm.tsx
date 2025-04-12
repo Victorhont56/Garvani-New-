@@ -1,17 +1,24 @@
-import { useEffect, useState } from 'react';
+// src/pages/auth/confirm.tsx
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 
-export default function EmailConfirm() {
+const EmailConfirmation = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState('Verifying your email...');
 
   useEffect(() => {
-    // Check if this is an email confirmation redirect
-    supabase.auth.onAuthStateChange(async (event) => {
-      if (event === 'SIGNED_IN') {
-        setMessage('Email verified! Redirecting...');
-        setTimeout(() => navigate('/dashboard'), 2000);
+    // Process the authentication session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // User is authenticated after confirmation
+        navigate('/dashboard');
+      } else {
+        // Redirect to login with confirmation success message
+        navigate('/login-page', { 
+          state: { 
+            message: 'Email confirmed successfully! Please login.' 
+          } 
+        });
       }
     });
   }, [navigate]);
@@ -19,9 +26,11 @@ export default function EmailConfirm() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Email Confirmation</h1>
-        <p>{message}</p>
+        <h2 className="text-2xl font-bold mb-4">Processing your confirmation...</h2>
+        <p>Please wait while we verify your email address.</p>
       </div>
     </div>
   );
-}
+};
+
+export default EmailConfirmation;

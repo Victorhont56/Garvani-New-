@@ -9,12 +9,14 @@ import Input from "./InputTwo";
 import Heading from "./Heading";
 import Button from "./Button";
 import { useAuth } from "@/app/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const RegisterModal = () => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const [isLoading, setIsLoading] = useState(false);
   const { supabase } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -58,50 +60,52 @@ const RegisterModal = () => {
     setIsLoading(true);
     
     try {
-      // 1. First create the auth user with minimal data
+      // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-          data: { // This goes to raw_user_meta_data
+          emailRedirectTo: `${window.location.origin}/login?confirmed=true`,
+          data: {
             first_name: data.firstname,
             last_name: data.lastname,
-            full_name: `${data.firstname} ${data.lastname}` // For display name
+            full_name: `${data.firstname} ${data.lastname}`
           }
         },
       });
       
       if (authError) throw authError;
-  
-      // 2. Create public profile (wait 1 second if needed to ensure user is created)
-      if (authData.user) {
-        // Optional: Add slight delay if profile creation fails
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
-            email: data.email,
-            first_name: data.firstname,
-            last_name: data.lastname,
-            updated_at: new Date().toISOString(),
-          });
-  
-        if (profileError) throw profileError;
+
+      // 2. Check if email confirmation is required
+      if (requiresEmailConfirmation) {
+        toast.success('Please check your email to confirm your account');
+        registerModal.onClose();
+        return;
       }
-  
-      toast.success(
-        requiresEmailConfirmation 
-          ? 'Please check your email for confirmation' 
-          : 'Registration successful!'
-      );
-      
-      registerModal.onClose();
+
+      // 3. If no email confirmation required, create profile
+      if (authData.user) {
+        await createPublicUserProfile(
+          authData.user.id,
+          data.email,
+          data.firstname,
+          data.lastname
+        );
+
+        toast.success('Registration successful! Redirecting...');
+        setTimeout(() => navigate("/dashboard"), 2000);
+      }
     } catch (error: any) {
       console.error('Registration Failed:', error);
-      toast.error(error.message || 'Registration failed. Please try again.');
+      
+      let errorMessage = 'Registration failed';
+      if (error.message.includes('User already registered')) {
+        errorMessage = 'This email is already registered';
+      } else if (error.message.includes('Database error')) {
+        errorMessage = 'Server error. Please try again later.';
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +127,8 @@ const RegisterModal = () => {
   
       if (error) throw error;
   
+      toast.success("Google login successful! Redirecting...");
+      setTimeout(() => navigate("/dashboard"), 2000);
     } catch (error: any) {
       toast.error(error.message || "Google sign in failed");
     } finally {
