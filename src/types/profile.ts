@@ -2,6 +2,7 @@
 export type Profile = {
   id: string;
   email: string;
+  avatar_url?: string | null; 
   first_name?: string;
   last_name?: string;
 };
@@ -21,7 +22,7 @@ export interface ListingCardProps {
   lga: string;
   photo: string | null;
   category_name?: string;
-  favorites: Favorite[];
+  favorites?: Favorite[];
 }
 
 export interface HomeData extends ListingCardProps {
@@ -35,11 +36,39 @@ export interface HomeData extends ListingCardProps {
   bedrooms?: string;
   livingrooms?: string;
   created_at: Date | string;
-  
   address?: string;
-  size?: number; // in sqft
+  size?: number;
   features?: string[];
-  year_built?: number;
+  year_built?: number | null;
   updated_at?: Date | string;
-
+  status: ListingStatus;
+  created_by: string;
+  reviewed_by?: string | null;
+  rejection_reason?: string | null;
+  profile?: Profile; // Add this for the joined profile data
 }
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+export interface User {
+  id: string;
+  avatar_url: string | null;
+  created_at: string | null; // <- make it nullable
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  updated_at: string | null;
+  is_admin: boolean;
+  user_roles?: {
+    is_admin?: boolean;
+  }[];
+}
+
+
+export type ListingStatus = "pending" | "active" | "rejected" | "inactive";

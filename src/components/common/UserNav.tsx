@@ -17,18 +17,19 @@ import { supabase } from "@/lib/supabase/client";
 import { Tooltip } from "@/components/ui/tooltip";
 import { FiUpload } from "react-icons/fi";
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
-
+import { FaShieldAlt } from "react-icons/fa";
+import { checkAdminStatus } from "@/lib/supabase/admin";
 
 export function UserNav() {
   const { user, isLoading } = useAuth();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
   const listModal = useListModal();
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -38,7 +39,6 @@ export function UserNav() {
       }
 
       try {
-        // Fetch user profile data
         const { data, error } = await supabase
           .from('profiles')
           .select('avatar_url')
@@ -55,11 +55,19 @@ export function UserNav() {
       }
     };
 
+    const checkAdmin = async () => {
+      if (user) {
+        const adminStatus = await checkAdminStatus(user.id);
+        setIsAdmin(adminStatus);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
     fetchProfileImage();
-  }, [user]); // Run when user changes
+    checkAdmin();
+  }, [user]);
 
-
-  // Get user initials
   const getInitials = () => {
     if (!user) return "";
     const firstNameInitial = user.user_metadata?.first_name?.[0] || "";
@@ -67,7 +75,6 @@ export function UserNav() {
     return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
   };
 
-  // Handle profile image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0] || !user) {
       showErrorToast('No file selected or user not logged in');
@@ -77,7 +84,6 @@ export function UserNav() {
     const file = e.target.files[0];
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     
-    // Validate file
     if (!validTypes.includes(file.type)) {
       showErrorToast('Please upload a JPEG, PNG, or WEBP image');
       return;
@@ -91,12 +97,10 @@ export function UserNav() {
     setUploading(true);
   
     try {
-      // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
   
-      // 1. Upload the file
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
         .upload(filePath, file, {
@@ -106,12 +110,10 @@ export function UserNav() {
   
       if (uploadError) throw uploadError;
   
-      // 2. Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('profile-images')
         .getPublicUrl(filePath);
   
-      // 3. Update profile - removed updated_at
       const { error: updateError } = await supabase
         .from('profiles')
         .upsert({ 
@@ -159,8 +161,15 @@ export function UserNav() {
       <div className="flex items-center gap-2">
         {user && (
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium flex items-center">
               Welcome, {user.user_metadata?.first_name || "User"}
+              {isAdmin && (
+                <Tooltip content="Admin User" position="bottom">
+                  <span className="ml-1 text-yellow-500">
+                    <FaShieldAlt className="inline" />
+                  </span>
+                </Tooltip>
+              )}
             </span>
             
             <Tooltip content={profileImage ? "Change profile image" : "Add profile image"} position="bottom">
@@ -169,16 +178,16 @@ export function UserNav() {
                   className="relative w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary-dark transition-colors overflow-hidden"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                 {profileImage ? (
-                  <img 
-                    src={profileImage} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                    onError={() => setProfileImage(null)} // Fallback to initials if image fails to load
-                  />
-                ) : (
-                  <span className="font-medium">{getInitials()}</span>
-                )}
+                  {profileImage ? (
+                    <img 
+                      src={profileImage} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      onError={() => setProfileImage(null)}
+                    />
+                  ) : (
+                    <span className="font-medium">{getInitials()}</span>
+                  )}
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <FiUpload className="text-white" />
                   </div>
@@ -210,6 +219,30 @@ export function UserNav() {
           <DropdownMenuContent align="end" className="w-[200px] z-[5000] bg-gradient-to-b from-white via-[#fbe5f1] to-[#affab0]">
             {user ? (
               <>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem className="hover:text-white hover:bg-primary">
+                      <Link to="/admin/admindashboard" className="w-full flex items-center gap-2">
+                        <FaShieldAlt className="text-yellow-500" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="hover:text-white hover:bg-primary">
+                      <Link to="/admin/pending-listings" className="w-full flex items-center gap-2">
+                        <FaShieldAlt className="text-yellow-500" />
+                        Review Listings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="hover:text-white hover:bg-primary">
+                      <Link to="/admin/users" className="w-full flex items-center gap-2">
+                        <FaShieldAlt className="text-yellow-500" />
+                        Manage Users
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                
                 <DropdownMenuItem
                   className="hover:text-white hover:bg-primary"
                   onClick={() => listModal.onOpen()}
@@ -218,32 +251,39 @@ export function UserNav() {
                     Add a new Listing
                   </button>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem className="hover:text-white hover:bg-primary">
                   <Link to="/dashboard" className="w-full">
                     My Dashboard
                   </Link>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem className="hover:text-white hover:bg-primary">
                   <Link to="/all-listings" className="w-full">
                     View all Listings
                   </Link>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem className="hover:text-white hover:bg-primary">
                   <Link to="/my-listings" className="w-full">
                     My Listings
                   </Link>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem className="hover:text-white hover:bg-primary">
                   <Link to="/favorites" className="w-full">
                     My Favorites
                   </Link>
                 </DropdownMenuItem>
+                
                 <DropdownMenuItem className="hover:text-white hover:bg-primary">
                   <Link to="/reservations" className="w-full">
                     My Reservations
                   </Link>
                 </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
+                
                 <DropdownMenuItem>
                   <Button
                     onClick={handleLogout}
@@ -265,7 +305,9 @@ export function UserNav() {
                     Sign In
                   </Button>
                 </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
+                
                 <DropdownMenuItem>
                   <Button
                     onClick={registerModal.onOpen}
