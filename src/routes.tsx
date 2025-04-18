@@ -15,63 +15,52 @@ import PendingListings from './pages/admin/PendingListings';
 import Users from './pages/admin/Users';
 import Layout from './pages/admin/Layout';
 
-// src/routes.tsx
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: <App />, // Public layout
+    element: <App />,
     children: [
-     
+      { path: 'all-listings', element: <AllListings /> },
     ],
+  },
+  {
+    path: '/login-page',
+    element: <LoginPage />,
+
   },
   {
     path: '/',
     element: (
       <AuthProvider>
-        <AuthLayout /> {/* Private auth layout */}
+        <AuthLayout />
       </AuthProvider>
     ),
     children: [
-        // Add protected routes here
-      {
-        path: 'dashboard',
-        element: (
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'my-listings',
-        element: (
-          <ProtectedRoute>
-            <MyListings />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "listing/:id",
-        element:  (
-          <ProtectedRoute>
-            <ListingDetails />
-          </ProtectedRoute>
-        )
-      }, 
-      { path: 'all-listings', element: <AllListings /> },
-      { path: 'login-page', element: <LoginPage /> },
-      {
-        path: "admin",
-        element: (
-          <AdminRoute>
-            <Layout />
-          </AdminRoute>
-        ),
-        children: [
-          { path: "admindashboard", element: <AdminDashboard /> },
-          { path: "pending-listings", element: <PendingListings /> },
-          { path: "users", element: <Users /> },
-        ],
-      }
+      { path: 'dashboard', element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
+      { path: 'my-listings', element: <ProtectedRoute><MyListings /></ProtectedRoute> },
+      { path: 'listing/:id', element: <ProtectedRoute><ListingDetails /></ProtectedRoute> },
     ],
   },
-];
+  {
+    path: '/admin',
+    element: (
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    ),
+    children: [
+      { 
+        index: true, 
+        element: <AdminRoute><AdminDashboard /></AdminRoute> 
+      },
+      { 
+        path: 'pending-listings', 
+        element: <AdminRoute><PendingListings /></AdminRoute> 
+      },
+      { 
+        path: 'users', 
+        element: <AdminRoute><Users /></AdminRoute> 
+      },
+    ],
+  },
+]

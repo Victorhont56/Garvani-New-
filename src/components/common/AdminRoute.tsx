@@ -1,28 +1,21 @@
-// components/AdminRoute.tsx
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/app/AuthProvider";
-import { checkAdminStatus } from "@/lib/supabase/admin";
-import { useEffect, useState } from "react";
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from '@/app/AuthProvider'
 
-export function AdminRoute({ children }: { children: JSX.Element }) {
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, isAdmin, isLoading } = useAuth()
+  const location = useLocation()
 
-  useEffect(() => {
-    const verifyAdmin = async () => {
-      if (user) {
-        const adminStatus = await checkAdminStatus(user.id);
-        setIsAdmin(adminStatus);
-      }
-      setLoading(false);
-    };
-    
-    verifyAdmin();
-  }, [user]);
+  if (isLoading) {
+    return <div className="flex justify-center p-8">Loading admin verification...</div>
+  }
 
-  if (loading) return <div>Loading...</div>;
-  if (!user || !isAdmin) return <Navigate to="/" replace />;
-  
-  return children;
+  if (!user) {
+    return <Navigate to="/login-page" state={{ from: location }} replace />
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" state={{ from: location }} replace />
+  }
+
+  return <>{children}</>
 }

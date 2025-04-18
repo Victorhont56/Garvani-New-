@@ -1,4 +1,3 @@
-// LoginModal.tsx
 import { useCallback, useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -11,6 +10,7 @@ import Heading from "./Heading";
 import Button from "./Button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
+import { checkAdminStatus } from "@/lib/supabase/admin";
 
 const LoginModal = () => {
   const navigate = useNavigate();
@@ -30,31 +30,54 @@ const LoginModal = () => {
     },
   });
 
-  // Show success message if redirected from email confirmation
   useEffect(() => {
     if (location.search.includes('confirmed=true')) {
       showSuccessToast('Email confirmed successfully! Please login.');
-      // Clear the query param
       navigate(location.pathname, { replace: true });
     }
   }, [location, navigate]);
+
+  const checkAndRedirect = async (userId: string) => {
+    try {
+      const isAdmin = await checkAdminStatus(userId);
+      if (isAdmin) {
+        showSuccessToast("Admin login successful! Redirecting to admin dashboard...");
+        setTimeout(() => {
+          loginModal.onClose();
+          navigate("/admin");
+        }, 1000);
+      } else {
+        showSuccessToast("Login successful! Redirecting to dashboard...");
+        setTimeout(() => {
+          loginModal.onClose();
+          navigate("/dashboard");
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      // Default to regular dashboard if admin check fails
+      showSuccessToast("Login successful! Redirecting to dashboard...");
+      setTimeout(() => {
+        loginModal.onClose();
+        navigate("/dashboard");
+      }, 1000);
+    }
+  };
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
       if (error) throw error;
 
-      showSuccessToast("Login successful! Redirecting...");
-      setTimeout(() => {
-        loginModal.onClose();
-        navigate("/dashboard");
-      }, 2000);
+      if (authData.user) {
+        await checkAndRedirect(authData.user.id);
+      }
     } catch (error: any) {
       showErrorToast(error.message || "An error occurred during login");
     } finally {
@@ -78,11 +101,12 @@ const LoginModal = () => {
 
       if (error) throw error;
 
+      // For OAuth, we'll check admin status after the redirect
       showSuccessToast("Google login successful! Redirecting...");
       setTimeout(() => {
         loginModal.onClose();
         navigate("/dashboard");
-      }, 2000);
+      }, 1000);
     } catch (error: any) {
       showErrorToast(error.message || "Google login failed");
     } finally {
@@ -95,6 +119,7 @@ const LoginModal = () => {
     registerModal.onOpen();
   }, [loginModal, registerModal]);
 
+  // ... rest of the component remains the same ...
   const bodyContent = (
     <div className="flex flex-col gap-4">
       <Heading title="Welcome back" subtitle="Login to your account!" />

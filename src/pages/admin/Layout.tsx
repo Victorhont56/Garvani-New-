@@ -1,20 +1,34 @@
-import { Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FiMenu, FiX, FiHome, FiList, FiUsers, FiSettings, FiLogOut } from "react-icons/fi";
 import { FaShieldAlt } from "react-icons/fa";
 import { useAuth } from "@/app/AuthProvider";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase/client";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
+
 
 export default function Layout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const navItems = [
-    { path: "/admin/dashboard", icon: <FiHome size={20} />, label: "Dashboard" },
-    { path: "/admin/pending-listings", icon: <FiList size={20} />, label: "Listings" },
-    { path: "/admin/users", icon: <FiUsers size={20} />, label: "Users" },
-    { path: "/admin/settings", icon: <FiSettings size={20} />, label: "Settings" },
+    { path: "", icon: <FiHome size={20} />, label: "Dashboard" },
+    { path: "pending-listings", icon: <FiList size={20} />, label: "Listings" },
+    { path: "users", icon: <FiUsers size={20} />, label: "Users" },
+    { path: "settings", icon: <FiSettings size={20} />, label: "Settings" },
   ];
+
+   const handleLogout = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (!error) {
+        showSuccessToast('Logged out successfully');
+        navigate("/");
+      } else {
+        showErrorToast('Failed to log out');
+      }
+    };
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-800">
@@ -29,14 +43,14 @@ export default function Layout() {
         
         <nav className="flex-1 px-4 py-6 space-y-1">
           {navItems.map((item) => (
-            <a
-              key={item.path}
-              href={item.path}
-              className="flex items-center px-4 py-3 rounded-lg transition-all hover:bg-indigo-700 hover:shadow-md"
-            >
-              <span className="mr-3 text-indigo-200">{item.icon}</span>
-              <span>{item.label}</span>
-            </a>
+           <Link
+           key={item.path}
+           to={`/admin/${item.path}`}
+           className="flex items-center px-4 py-3 rounded-lg transition-all hover:bg-indigo-700 hover:shadow-md"
+           >
+            <span className="mr-3 text-indigo-200">{item.icon}</span>
+            <span>{item.label}</span>
+           </Link>
           ))}
         </nav>
         
@@ -50,7 +64,9 @@ export default function Layout() {
               <p className="text-xs text-indigo-300">Administrator</p>
             </div>
           </div>
-          <button className="mt-4 w-full flex items-center justify-center space-x-2 text-indigo-200 hover:text-white">
+          <button className="mt-4 w-full flex items-center justify-center space-x-2 text-indigo-200 hover:text-white"
+                   onClick={handleLogout}
+          >
             <FiLogOut size={18} />
             <span>Logout</span>
           </button>
@@ -78,14 +94,14 @@ export default function Layout() {
             </div>
             <nav className="px-4 py-6 space-y-1">
               {navItems.map((item) => (
-                <a
+               <Link
                   key={item.path}
-                  href={item.path}
-                  className="flex items-center px-4 py-3 rounded-lg transition-all hover:bg-indigo-700"
+                  to={`/admin/${item.path}`}
+                  className="flex items-center px-4 py-3 rounded-lg transition-all hover:bg-indigo-700 hover:shadow-md"
                 >
                   <span className="mr-3 text-indigo-200">{item.icon}</span>
                   <span>{item.label}</span>
-                </a>
+                </Link>
               ))}
             </nav>
           </motion.aside>

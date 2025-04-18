@@ -222,7 +222,7 @@ export function UserNav() {
                 {isAdmin && (
                   <>
                     <DropdownMenuItem className="hover:text-white hover:bg-primary">
-                      <Link to="/admin/admindashboard" className="w-full flex items-center gap-2">
+                      <Link to="/admin" className="w-full flex items-center gap-2">
                         <FaShieldAlt className="text-yellow-500" />
                         Admin Dashboard
                       </Link>

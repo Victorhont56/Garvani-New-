@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { checkAdminStatus } from "@/lib/supabase/admin";
 import { useAuth } from "@/app/AuthProvider";
 import { supabase } from "@/lib/supabase/client";
@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import { HomeData, ListingStatus } from "@/types/profile";
+import { TbCurrencyNaira } from "react-icons/tb";
+
+
 
 export default function PendingListings() {
   const { user } = useAuth();
@@ -198,7 +201,7 @@ export default function PendingListings() {
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>Bedrooms: {listing.bedrooms || 'N/A'}</p>
                     <p>Bathrooms: {listing.bathrooms || 'N/A'}</p>
-                    <p>Price: ${listing.price?.toLocaleString() || 'N/A'}</p>
+                    <p className="flex flex-row gap-1"><span>Price: </span><span className= "flex flex-row items-center"><TbCurrencyNaira />{listing.price?.toLocaleString() || 'N/A'}</span></p>
                   </div>
                 </div>
                 
@@ -226,10 +229,15 @@ export default function PendingListings() {
                     }}
                   >
                     <FiX className="mr-2" /> Reject
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <FiEye className="mr-2" /> View Details
-                  </Button>
+                  
+                    </Button>
+                    <Link to={`/listing/${listing.id}`}>
+                    <Button variant="outline" className="w-full"
+                    
+                    >
+                      <FiEye className="mr-2" /> View Details
+                    </Button>
+                    </Link>
                 </div>
               </CardContent>
             </Card>

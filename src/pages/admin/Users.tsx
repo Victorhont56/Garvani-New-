@@ -36,6 +36,18 @@ interface User {
   is_admin: boolean;
 }
 
+interface UserWithRole {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  updated_at: string | null;
+  created_at: string;
+  is_admin: boolean;
+  role_created_at?: string | null;
+}
+
 
 export default function Users() {
   const { user } = useAuth();
@@ -45,6 +57,7 @@ export default function Users() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const verifyAdmin = async () => {
@@ -61,57 +74,58 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Fetch profiles
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, avatar_url, created_at, email, first_name, last_name, updated_at')
+        setError(null);
+        setLoading(true);
+        
+        const { data: users, error } = await supabase
+          .from('user_with_roles')
+          .select('*')
           .order('created_at', { ascending: false });
     
-        if (profilesError) throw profilesError;
-        if (!profiles) return;
-    
-        // Fetch user roles
-        const { data: userRoles, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, is_admin');
-    
-        if (rolesError) throw rolesError;
-    
-        // Combine data with proper typing
-        const formattedUsers: User[] = profiles.map(profile => ({
-          ...profile,
-          is_admin: userRoles?.find(role => role.user_id === profile.id)?.is_admin ?? false
-        }));
-    
-        setUsers(formattedUsers);
-      } catch (error) {
-        console.error('Error fetching users:', error);
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        if (!users) {
+          throw new Error('No users found');
+        }
+        
+        setUsers(users as UserWithRole[]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch users');
+        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, [searchTerm]);
 
   const toggleAdminStatus = async (userId: string, currentAdminStatus: boolean) => {
     try {
+      // Update the user_roles table directly
       const { error } = await supabase
         .from('user_roles')
-        .upsert({ 
-          user_id: userId, 
-          is_admin: !currentAdminStatus 
-        }, {
-          onConflict: 'user_id'
-        });
+        .upsert(
+          { 
+            user_id: userId, 
+            is_admin: !currentAdminStatus 
+          },
+          { 
+            onConflict: 'user_id' 
+          }
+        );
   
       if (error) throw error;
   
+      // Optimistic UI update
       setUsers(users.map(u => 
         u.id === userId ? { ...u, is_admin: !currentAdminStatus } : u
       ));
     } catch (error) {
       console.error('Error updating admin status:', error);
+      // Revert UI if error occurs
+      setUsers([...users]);
     }
   };
 
@@ -262,6 +276,12 @@ export default function Users() {
           onPageChange={(page) => setCurrentPage(page)}
           className="mt-6"
         />
+      )}
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
       )}
     </div>
   );
