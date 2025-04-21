@@ -23,6 +23,7 @@ export interface ListingCardProps {
   photo: string | null;
   category_name?: string;
   favorites?: Favorite[];
+  status: ListingStatus;
 }
 
 export interface HomeData extends ListingCardProps {

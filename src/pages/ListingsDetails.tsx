@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ListModal from '@/components/common/ListModal';
 import { Toaster } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 interface ProfileData {
   id: string;
@@ -200,8 +201,16 @@ export default function ListingDetails() {
               </div>
 
               <div className="space-y-4">
-                <Button className="w-full bg-primary hover:bg-primary/90 h-12">
-                  Contact Owner
+              <Button asChild className="w-full bg-primary hover:bg-primary/90 h-12">
+                  <Link 
+                    to={`/messages/new?recipient=${listing.user_id}&property=${listing.id}`}
+                    state={{ 
+                      recipient: owner,
+                      property: listing 
+                    }}
+                  >
+                    Contact Owner
+                  </Link>
                 </Button>
                 <Button variant="outline" className="w-full h-12">
                   Request Tour

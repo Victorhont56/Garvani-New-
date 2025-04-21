@@ -14,13 +14,15 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import PendingListings from './pages/admin/PendingListings';
 import Users from './pages/admin/Users';
 import Layout from './pages/admin/Layout';
+import Messages from '@/pages/Messages';
+import MessageDetail from '@/pages/MessageDetail';
 
 export const routes: RouteObject[] = [
   {
     path: '/',
     element: <App />,
     children: [
-      { path: 'all-listings', element: <AllListings /> },
+      
     ],
   },
   {
@@ -28,6 +30,12 @@ export const routes: RouteObject[] = [
     element: <LoginPage />,
 
   },
+  { path: 'all-listings', element: <AllListings /> },
+
+
+  {path: "/messages", element: <Messages /> },
+  {path: "/messages/:id", element: <MessageDetail />},
+   {path: "/messages/new", element: <MessageDetail />},
   {
     path: '/',
     element: (

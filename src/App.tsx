@@ -7,13 +7,12 @@ import ListModal from './components/common/ListModal'
 import LoginModal from './components/common/LoginModal'
 import RegisterModal from './components/common/RegisterModal'
 import { useState, useEffect } from 'react'
-import AuthProvider from './app/AuthProvider'
 import HeroTwo from './components/common/HeroTwo'
 import { Outlet } from 'react-router-dom'
 import StepsComponent from "@/components/common/StepsComponent"
 import WhyChooseUs from './components/common/WhyChooseUs'
 import AllProperty from './components/common/AllProperty'
-import { Toaster } from 'react-hot-toast' 
+import { Toaster } from 'react-hot-toast'
 
 interface AppProps {
   children?: React.ReactNode;
@@ -22,7 +21,6 @@ interface AppProps {
 export default function App({ children }: AppProps) {
   const [searchParams, setSearchParams] = useState<Record<string, string | undefined>>({});
   const [loading, setLoading] = useState(true);
-  
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -34,25 +32,21 @@ export default function App({ children }: AppProps) {
   }, []);
 
   return (
-    <AuthProvider>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <HeroSection />
-        <HeroTwo/>
-        <WhyChooseUs/>
-        <StepsComponent />
-        <AllProperty/>
-        
-        
-        <main className="flex-grow">
-          <Outlet /> {/* This renders the matched child route */}
-        </main>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <HeroSection />
+      <HeroTwo/>
+      <WhyChooseUs/>
+      <StepsComponent />
+      <AllProperty/>
+      
+      <main className="flex-grow">
+        <Outlet />
+      </main>
 
-        <Footer />
-      </div>
+      <Footer />
       {children}
       
-      {/* Add the Toaster component here */}
       <ListModal />
       <LoginModal />
       <Toaster
@@ -82,6 +76,6 @@ export default function App({ children }: AppProps) {
         }}
       />
       <RegisterModal />
-    </AuthProvider>
+    </div>
   );
 }

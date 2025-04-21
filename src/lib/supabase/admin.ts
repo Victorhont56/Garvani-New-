@@ -2,9 +2,9 @@ import { supabase } from "./client";
 
 export const checkAdminStatus = async (userId: string): Promise<boolean> => {
   const { data, error } = await supabase
-    .from('user_roles')
+    .from('user_with_roles')
     .select('is_admin')
-    .eq('user_id', userId)
+    .eq('id', userId)
     .single();
 
   if (error || !data) {

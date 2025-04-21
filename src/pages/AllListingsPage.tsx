@@ -1,4 +1,3 @@
-// src/app/all-listings/page.tsx
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/app/AuthProvider';
@@ -21,6 +20,7 @@ interface Listing {
   photo: string | null;
   category_name?: string;
   favorites: any[];
+  status: 'pending' | 'active' | 'rejected' | 'inactive';
 }
 
 const AllProperty = () => {
@@ -38,14 +38,15 @@ const AllProperty = () => {
     priceRange: [0, 10000000] as [number, number]
   });
 
-  // Fetch all listings
+  // Fetch all ACTIVE listings
   useEffect(() => {
     const fetchListings = async () => {
       try {
         setLoading(true);
         const { data, error } = await supabase
           .from('homes')
-          .select('*'); // Start with simplest query
+          .select('*')
+          .eq('status', 'active'); // Only fetch active listings
     
         if (error) throw error;
     
@@ -59,7 +60,8 @@ const AllProperty = () => {
           lga: item.lga,
           photo: item.photo,
           category_name: item.category_name,
-          favorites: item.favorites || []
+          favorites: item.favorites || [],
+          status: item.status || 'inactive'
         }));
     
         setListings(typedListings);
@@ -93,83 +95,78 @@ const AllProperty = () => {
     <div className="bg-gray-50 min-h-screen">
       <Navbar/>
       <div className='mt-[100px]'>
-      {/* Sticky Header Container */}
-      <div className="sticky top-[60px] z-40 bg-white shadow-sm ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header Content */}
-          <div className="flex flex-row justify-between items-center py-4">
-            <div className="font-bold text-2xl leading-tight">
-              All Listings
+        <div className="sticky top-[60px] z-40 bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-row justify-between items-center py-4">
+              <div className="font-bold text-2xl leading-tight">
+                All Listings
+              </div>
+              <Button 
+                onClick={searchModal.onOpen}
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+              >
+                <FiSearch className="h-4 w-4" />
+                Search & Filter
+              </Button>
             </div>
-            <Button 
-              onClick={searchModal.onOpen}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-            >
-              <FiSearch className="h-4 w-4" />
-              Search & Filter
-            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Listings grid */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-500">{error}</div>
-        ) : filteredListings.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-medium text-gray-700">No listings found matching your criteria</h3>
-            <Button 
-              onClick={() => {
-                setFilters({
-                  mode: 'All',
-                  type: 'All',
-                  category: null,
-                  state: null,
-                  lga: null,
-                  priceRange: [0, 10000000]
-                });
-              }}
-              className="mt-4"
-            >
-              Reset Filters
-            </Button>
-          </div>
-        ) : (
-          <div className='flex items-center justify-center'>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                item={{
-                  id: listing.id,
-                  title: listing.title,
-                  price: listing.price,
-                  mode: listing.mode,
-                  state: listing.state,
-                  lga: listing.lga,
-                  photo: listing.photo || '',
-                  favorites: listing.favorites
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500">{error}</div>
+          ) : filteredListings.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-medium text-gray-700">No listings found matching your criteria</h3>
+              <Button 
+                onClick={() => {
+                  setFilters({
+                    mode: 'All',
+                    type: 'All',
+                    category: null,
+                    state: null,
+                    lga: null,
+                    priceRange: [0, 10000000]
+                  });
                 }}
-                userId={user?.id || ''}
-                pathName="/listing/:id"
-              />
-            ))}
-          </div>
-          </div>
-        )}
-      </div>
+                className="mt-4"
+              >
+                Reset Filters
+              </Button>
+            </div>
+          ) : (
+            <div className='flex items-center justify-center'>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredListings.map((listing) => (
+                  <ListingCard
+                    key={listing.id}
+                    item={{
+                      id: listing.id,
+                      title: listing.title,
+                      price: listing.price,
+                      mode: listing.mode,
+                      state: listing.state,
+                      lga: listing.lga,
+                      photo: listing.photo || '',
+                      favorites: listing.favorites,
+                      status: listing.status
+                    }}
+                    userId={user?.id || ''}
+                    pathName="/listing/:id"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
-      {/* Search Modal */}
-      <SearchModal 
-        onApplyFilters={handleApplyFilters}
-      />
-      <Footer/>
-     </div>
+        <SearchModal onApplyFilters={handleApplyFilters} />
+        <Footer/>
+      </div>
     </div>
   );
 };
